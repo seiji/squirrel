@@ -2,6 +2,9 @@ module Squirrel
 
   class App
     attr_reader :window
+    attr_reader :width
+    attr_reader :height
+    
     attr_reader :right_pane
     
     def initialize(window)
@@ -9,6 +12,7 @@ module Squirrel
       @width = Ncurses.getmaxx(@window)
       @height = Ncurses.getmaxy(@window)
 
+      @header = Squirrel::View::Header.new(self)
       @left_pane  = Squirrel::View::TableSelect.new(self)
       @right_pane = Squirrel::View::Table.new(self)
       
@@ -37,8 +41,9 @@ module Squirrel
     def loop
       @cur_y = 0
       @window.clear
+      @header.show
       @left_pane.show
-      #      move_pointer(0)
+#      move_pointer(0)
 
       while true do
         c = @window.getch

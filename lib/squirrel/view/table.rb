@@ -39,13 +39,13 @@ module Squirrel::View
         @window.attroff(Ncurses.COLOR_PAIR(3)| Ncurses::A_REVERSE)
         @cur_y += 1
 
-        @window.attron(Ncurses.COLOR_PAIR(4))
+        @window.attron(Ncurses.COLOR_PAIR(13))
 
         @columns.each_with_index do |column, j|
           column_name = column["name"]
           @window.mvprintw @cur_y, j *10, "%-10s", column_name
         end
-        @window.attroff(Ncurses.COLOR_PAIR(4))
+        @window.attroff(Ncurses.COLOR_PAIR(13))
         @cur_y += 1        
         
         @rows.each_with_index do |row, i|
@@ -69,9 +69,9 @@ module Squirrel::View
         
         # 1
         columns_header = %w(cid name type notnull dflt_value pk)
-        @window.attron(Ncurses.COLOR_PAIR(4))
+        @window.attron(Ncurses.COLOR_PAIR(13))
         @window.mvprintw @cur_y, 0, "%3s %-24s %-14s %-7s %-14s %-5s", *columns_header
-        @window.attroff(Ncurses.COLOR_PAIR(4))
+        @window.attroff(Ncurses.COLOR_PAIR(13))
         
         @indices.each_with_index do |index, i|
           @window.mvprintw @cur_y, 72 + 4 + i * 30, "%-30s", index["name"]
@@ -98,10 +98,10 @@ module Squirrel::View
             end
             end
             if is_index_column
-            @window.attron(Ncurses.COLOR_PAIR(3)|Ncurses::A_REVERSE)
+            @window.attron(Ncurses.COLOR_PAIR(12))
             end
-            @window.mvprintw i + @cur_y, 72 + 4 + j * 30, "%-30s", is_index_column ? "" : "-"
-            @window.attroff(Ncurses.COLOR_PAIR(3)| Ncurses::A_REVERSE)
+            @window.mvprintw i + @cur_y, 72 + 4 + j * 30, "%-30s", is_index_column ? "*" : "-"
+            @window.attroff(Ncurses.COLOR_PAIR(12))
           end
         end
 

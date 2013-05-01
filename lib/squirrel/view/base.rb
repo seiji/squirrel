@@ -1,17 +1,27 @@
 module Squirrel::View
   class Base
-    def initialize(stdscr)
-      @stdscr = stdscr
 
-      @min_y = 1
-      @max_y = @stdscr.getmaxy - 5
-
-      @cur_y = 1
+    def initialize(app, x, y, width, height)
+      @app = app
+      @width = width
+      @height = height
+      @window = app.window.subwin(@height, @width, y, x)
+      @window.scrollok(true)
+      Ncurses.keypad(@window, true)
+      @cur_y = 0
       @cur_x = 0
-
-      @pages = []
-      @cur_page = 0
     end
+
+    def draw_str(str, x, y, width=0, space=0)
+      if width == 0
+        width = str.length
+      end
+      
+      @window.mvaddstr(y, x, str.display_slice(width).concat(" " * space))
+      return x + width + space
+    end
+
+    
     def incr_page
       check_page = @cur_page + 1
       check_page = @cur_page if check_page >= @pages.length
