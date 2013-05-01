@@ -7,14 +7,9 @@ module Squirrel::View
 
     def show
       @window.move(@cur_y, 0)
-
-      @window.attron(Ncurses.COLOR_PAIR(14)|Ncurses::A_REVERSE)
-      
-      @window.mvprintw 0, 0, "%s", $path
-
-#      @window.addstr "hogehoge #{@width}"
-      
-      @window.attroff(Ncurses.COLOR_PAIR(14)|Ncurses::A_REVERSE)
+      @window.attron(Ncurses.COLOR_PAIR(14))
+      add_str($path, 0, 0, $path.size)
+      @window.attroff(Ncurses.COLOR_PAIR(14))
       @window.noutrefresh
     end
   end

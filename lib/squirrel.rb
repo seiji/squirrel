@@ -5,8 +5,13 @@ require "squirrel/helper"
 require "squirrel/model"
 require "squirrel/view/base"
 require "squirrel/view/header"
+require "Squirrel/view/command_line"
+require "squirrel/view/list_table"
+require "Squirrel/view/status_line"
 require "squirrel/view/table"
-require "squirrel/view/table_select"
+require "squirrel/view/table_structure"
+require "squirrel/view/table_data"
+require "squirrel/view/table_row"
 
 module Squirrel
   # Your code goes here...
