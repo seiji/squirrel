@@ -43,13 +43,15 @@ module Squirrel::View
     end
 
     def next
-      @delegate.next
-      @window.noutrefresh
+      if @delegate.next
+        @window.noutrefresh
+      end
     end
 
     def prev
-      @delegate.prev
-      @window.noutrefresh
+      if @delegate.prev
+        @window.noutrefresh
+      end
     end
 
   end

@@ -4,15 +4,17 @@ module Squirrel::View
     def initialize(view)
       @view = view
       @window = view.window
-      @selected_index = -1
-      @window.scrollok(false)
+      @selected_index = 0
+      @scroll_offset = 0
+
+      @window.scrollok(true)
       Ncurses.keypad(@window, false)
 
     end
 
     def update(table)
       @table = table
-      columns = Squirrel::Model.table_info(table.name)
+      @columns = Squirrel::Model.table_info(table.name)
       rows = Squirrel::Model.table_data(table.name)
       @items = rows
       
@@ -23,7 +25,7 @@ module Squirrel::View
 
       x, y = 0, 1
       @window.attron(Ncurses.COLOR_PAIR(13))
-      columns.each_with_index do |column, j|
+      @columns.each_with_index do |column, j|
         column_name = column.name
         width_col = @view.width_data(column)
         x = @view.add_str(column_name, x, y, width_col, 1)
@@ -33,7 +35,7 @@ module Squirrel::View
       x, y = 0, 2
       rows.each_with_index do |row, i|
         x = 0
-        columns.each_with_index do |column, j|
+        @columns.each_with_index do |column, j|
           column_name = column.name
           width_col = @view.width_data(column)
           if (x + width_col < @view.width)
@@ -56,39 +58,66 @@ module Squirrel::View
 
     def next
       new_index = @selected_index + 1
-      new_index = @items.size - 1 if new_index >= @items.size
+      if new_index >= @items.size
+        new_index = @items.size - 1
+        return false
+      end
+      if new_index > 9
+        scroll 1
+      end
       select new_index
+      return true
     end
 
     def prev
       new_index = @selected_index - 1
-      new_index = 0 if new_index < 0
+      if new_index < 0
+        new_index = 0
+        return false
+      end
+      if new_index > 9 - 1
+        scroll -1
+        update_row(0, @items[@scroll_offset])
+      end
+      @view.app.status_line.update "#{@scroll_offset}"
       select new_index
+      return true
     end
 
     private
-    def select(index = 0)
+    def select(new_index = 0)
+      old_index = @selected_index
+      @selected_index = new_index
+
+      update_row(old_index - @scroll_offset, @items[old_index])
+      update_row(new_index - @scroll_offset, @items[new_index])
+      open_row @columns, new_index
+    end
+
+    def update_row(index = 0, row)
+      return if index > @view.height
+
       x, y = 0, 2
-      columns = Squirrel::Model.table_info(@table.name)
-      rows = Squirrel::Model.table_data(@table.name)
-      @items = rows
-      rows.each_with_index do |row, i|
-        x = 0
-        if (i == index)
-          @selected_index = i
-          @window.attron(Ncurses.COLOR_PAIR(1)|Ncurses::A_REVERSE)
-        end
-        columns.each_with_index do |column, j|
-          column_name = column.name
-          width_col = @view.width_data(column)
-          if (x + width_col < @view.width)
-            x = @view.add_str(row[column_name].to_s, x, i + y, width_col, 1)
-          end
-        end
-        x = @view.add_str(" ", x, i + y, @view.width - x)
-        @window.attroff(Ncurses.COLOR_PAIR(1)| Ncurses::A_REVERSE)
+      if index == @selected_index - @scroll_offset
+        @window.attron(Ncurses.COLOR_PAIR(1)|Ncurses::A_REVERSE)
       end
-      open_row columns, index
+      @columns.each_with_index do |column, j|
+        column_name = column.name
+        width_col = @view.width_data(column)
+        if (x + width_col < @view.width)
+          x = @view.add_str(row[column_name].to_s, x, index + y, width_col, 1)
+        end
+      end
+      x = @view.add_str(" ", x, index + y, @view.width - x)
+      @window.attroff(Ncurses.COLOR_PAIR(1)| Ncurses::A_REVERSE)
+    end
+    
+    def scroll(line)
+      Ncurses.wscrl(@window, line)
+#      Ncurses.wrefresh(@window)
+      @window.noutrefresh
+
+      @scroll_offset += line
     end
 
     def open_row(columns, index)

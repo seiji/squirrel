@@ -1,6 +1,7 @@
 # Squirrel
 
-TODO: Write a gem description
+SQLite client using ncurses. 
+
 
 ## Installation
 

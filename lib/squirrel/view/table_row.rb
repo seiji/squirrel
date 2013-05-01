@@ -5,7 +5,7 @@ module Squirrel::View
     def initialize(view)
       @view = view
       @width  = view.app.width / 8 * 7
-      offset = 10
+      offset = 13
       @height = view.app.height - 3 - (offset -1)
 
       @window = view.window.subwin(@height, @width, offset, view.app.width / 8)
