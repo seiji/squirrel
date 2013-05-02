@@ -1,25 +1,26 @@
 # Squirrel
 
-SQLite client using ncurses. 
-
+SQLite client command line
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Checkout this project:
 
-    gem 'squirrel'
+    hub clone seiji/squirrel
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install squirrel
-
 ## Usage
 
-TODO: Write usage instructions here
+Execute this script
+
+    squirrel /path/to/your.sqlite
+
+Or
+
+    bundle exec bin/squirrel /path/to/your.sqlite
 
 ## Contributing
 
