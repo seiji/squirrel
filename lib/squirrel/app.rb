@@ -26,24 +26,36 @@ module Squirrel
       @focus_table = false
     end
 
-    def display_menu
-      @window.clear
-      @window.move(0, 0)
-      @window.addstr(" rutt #{@menu}\n")
+    def down
+      if @focus_table
+        @table_pane.next
+      else
+        @left_pane.next
+      end
     end
 
-    def move_pointer(pos, move_to=false)
-      @window.move(@cur_y, 0)
-      @window.addstr(" ")
-
-      if move_to == true
-        @cur_y = pos
+    def up
+      if @focus_table
+        @table_pane.prev
       else
-        @cur_y += pos
+        @left_pane.prev
       end
+    end
 
-      @window.move(@cur_y, 0)
-      @window.addstr(">")
+    def quit
+      if @focus_table
+        @focus_table = false
+        @table_pane.exit
+      else
+        @command_line.update "Quit? (Y/n)"
+        ch = @window.getch
+        case ch.chr
+        when /Y/
+          return true
+        end
+        @command_line.clear
+      end
+      return false
     end
 
     def loop
@@ -51,8 +63,6 @@ module Squirrel
       @window.clear
       @header.show
       @left_pane.show
-      
-      #      move_pointer(0)
 
       while true do
         @command_line.clear
@@ -61,30 +71,11 @@ module Squirrel
         if c > 0 and c < 255
           case c.chr
           when /j/i
-            if @focus_table
-              @table_pane.next
-            else
-              @left_pane.next
-            end
+            down
           when /k/i
-            if @focus_table
-              @table_pane.prev
-            else
-              @left_pane.prev
-            end
+            up
           when /q/i
-            if @focus_table
-              @focus_table = false
-              @table_pane.exit
-            else
-              @command_line.update "Quit? (Y/n)"
-              ch = @window.getch
-              case ch.chr
-              when /Y/
-                break
-              end
-              @command_line.clear
-            end
+            break if quit()
           else
             case c
             when 9              # tab
@@ -101,13 +92,16 @@ module Squirrel
               Ncurses.noecho()
               @command_line.clear
             end
-            str = "c: #{c}"
-            @status_line.update str
           end
         else
-          str = "c: #{c}"
-          @status_line.update str
+          case c
+          when Ncurses::KEY_DOWN
+            down
+          when Ncurses::KEY_UP
+            up
+          end
         end
+        
       end
     end
 
